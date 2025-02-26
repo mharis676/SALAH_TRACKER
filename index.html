@@ -77,7 +77,7 @@
 
     <!-- Firebase and JavaScript Code -->
     <script type="module">
-        // Import Firebase modules
+        // 🔹 Import Firebase Modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
@@ -92,11 +92,14 @@
             measurementId: "G-BDTBHSRXG4"
         };
 
-        // Initialize Firebase
+        // 🔹 Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Default missed Salah counts
+        // 🔹 Unique User ID (You can replace this with an Authenticated User ID)
+        const userId = "testUser"; 
+
+        // 🔹 Default Missed Salah Counts
         const defaultCounts = {
             "Fajr": 6169,
             "Dhuhr": 6169,
@@ -106,11 +109,11 @@
             "Witr": 6169
         };
 
-        let salahCounts = {}; // Stores counts from Firebase
+        let salahCounts = {}; // Store Salah counts from Firebase
 
-        // Function to fetch Salah data from Firebase
+        // 🔹 Load Salah Data from Firebase
         async function loadData() {
-            const docRef = doc(db, "users", "yourUserID"); // Change "yourUserID" to a unique user ID
+            const docRef = doc(db, "users", userId);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -123,9 +126,9 @@
             renderTable();
         }
 
-        // Function to update Salah count in Firebase
+        // 🔹 Update Salah Count in Firebase
         async function updateSalah(salah, value) {
-            const docRef = doc(db, "users", "yourUserID");
+            const docRef = doc(db, "users", userId);
 
             if (salahCounts[salah] + value >= 0) {
                 salahCounts[salah] += value;
@@ -134,7 +137,7 @@
             }
         }
 
-        // Function to render table
+        // 🔹 Function to Render Table
         function renderTable() {
             let tableBody = document.getElementById("salahTable");
             tableBody.innerHTML = "";
@@ -155,7 +158,10 @@
             });
         }
 
-        // Load Salah data on page load
+        // 🔹 Ensure updateSalah() is available globally
+        window.updateSalah = updateSalah;
+
+        // 🔹 Load Salah Data on Page Load
         document.addEventListener("DOMContentLoaded", loadData);
     </script>
 </body>
