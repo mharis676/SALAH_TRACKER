@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missed Salah Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c2f33;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            width: 60%;
+            margin: auto;
+            background: #23272a;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #2c2f33;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #7289da;
+            color: white;
+        }
+        td {
+            background-color: #23272a;
+        }
+        button {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            margin: 2px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .add-btn {
+            background-color: #43b581;
+            color: white;
+        }
+        .remove-btn {
+            background-color: #f04747;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Missed Salah Tracker</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Prayer</th>
+                    <th>Missed Count</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="salahTable">
+                <!-- Salah rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Firebase and JavaScript Code -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // 🔹 Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA0xMBhvGnWYtEBeAN77buiAmogOnX6XtM",
+            authDomain: "salah-tracker-f9daf.firebaseapp.com",
+            projectId: "salah-tracker-f9daf",
+            storageBucket: "salah-tracker-f9daf.appspot.com",
+            messagingSenderId: "102083283984",
+            appId: "1:102083283984:web:45fa20f01952ce62bace95",
+            measurementId: "G-BDTBHSRXG4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Default missed Salah counts
+        const defaultCounts = {
+            "Fajr": 6169,
+            "Dhuhr": 6169,
+            "Asr": 6169,
+            "Maghrib": 6169,
+            "Isha Fard": 6169,
+            "Witr": 6169
+        };
+
+        let salahCounts = {}; // Stores counts from Firebase
+
+        // Function to fetch Salah data from Firebase
+        async function loadData() {
+            const docRef = doc(db, "users", "yourUserID"); // Change "yourUserID" to a unique user ID
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                salahCounts = docSnap.data();
+            } else {
+                await setDoc(docRef, defaultCounts); // Create document if not exists
+                salahCounts = defaultCounts;
+            }
+
+            renderTable();
+        }
+
+        // Function to update Salah count in Firebase
+        async function updateSalah(salah, value) {
+            const docRef = doc(db, "users", "yourUserID");
+
+            if (salahCounts[salah] + value >= 0) {
+                salahCounts[salah] += value;
+                await updateDoc(docRef, { [salah]: salahCounts[salah] });
+                renderTable();
+            }
+        }
+
+        // Function to render table
+        function renderTable() {
+            let tableBody = document.getElementById("salahTable");
+            tableBody.innerHTML = "";
+
+            Object.keys(salahCounts).forEach((salah) => {
+                let row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${salah}</td>
+                    <td>${salahCounts[salah]}</td>
+                    <td>
+                        <button class="add-btn" onclick="updateSalah('${salah}', 1)">+1</button>
+                        <button class="remove-btn" onclick="updateSalah('${salah}', -1)">-1</button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Load Salah data on page load
+        document.addEventListener("DOMContentLoaded", loadData);
+    </script>
+</body>
+</html>
